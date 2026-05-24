@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مبادئ الخرائط</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:#020818;
+  min-height:100vh;
+  font-family:'Tajawal',sans-serif;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  overflow:hidden;
+}
+
+.title {
+  position:fixed; top:14px; left:50%; transform:translateX(-50%);
+  font-size:clamp(1rem,3vw,1.6rem); font-weight:900;
+  color:#fff; text-shadow:0 0 20px #4fc3f7; z-index:5;
+  text-align:center; white-space:nowrap;
+}
+.subtitle {
+  position:fixed; top:54px; left:50%; transform:translateX(-50%);
+  font-size:0.75rem; color:rgba(255,255,255,0.35); z-index:5;
+  text-align:center; white-space:nowrap;
+}
+
+/* النجوم */
+.stars { position:fixed; inset:0; z-index:0; overflow:hidden; }
+.star {
+  position:absolute; background:#fff; border-radius:50%;
+  animation:twinkle linear infinite;
+}
+@keyframes twinkle {
+  0%,100%{opacity:0.2} 50%{opacity:1}
+}
+
+/* الشمس */
+.system {
+  position:relative; z-index:1;
+  width:min(90vw,90vh); height:min(90vw,90vh);
+}
+
+.sun {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:clamp(60px,11vw,100px); height:clamp(60px,11vw,100px);
+  border-radius:50%;
+  background:radial-gradient(circle at 38% 35%, #fff8c0 0%, #ffd740 35%, #ff8f00 70%, #e65100 100%);
+  box-shadow:0 0 50px 15px #ffd74099, 0 0 100px 40px #ff8f0044;
+  animation:sunPulse 4s ease-in-out infinite;
+  cursor:pointer; z-index:10;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; text-align:center;
+}
+@keyframes sunPulse {
+  0%,100%{box-shadow:0 0 50px 15px #ffd74099, 0 0 100px 40px #ff8f0044;}
+  50%{box-shadow:0 0 70px 25px #ffd740bb, 0 0 130px 60px #ff8f0066;}
+}
+.sun-text { font-size:clamp(0.5rem,1.2vw,0.75rem); font-weight:900; color:#3d1a00; line-height:1.2; }
+
+/* المدارات والكواكب */
+.orbit-ring {
+  position:absolute; top:50%; left:50%;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.06);
+  transform:translate(-50%,-50%);
+}
+
+.planet-container {
+  position:absolute; top:50%; left:50%;
+  width:0; height:0;
+  transform-origin:0 0;
+  animation:spinOrbit linear infinite;
+}
+@keyframes spinOrbit {
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+
+.planet {
+  position:absolute;
+  border-radius:50%;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transform:translate(-50%,-50%);
+  animation:counterSpin linear infinite;
+  transition:filter 0.3s;
+}
+@keyframes counterSpin {
+  from{transform:translate(-50%,-50%) rotate(0deg);}
+  to{transform:translate(-50%,-50%) rotate(-360deg);}
+}
+.planet:hover { filter:brightness(1.4) drop-shadow(0 0 12px #fff); }
+
+.planet-emoji { font-size:clamp(0.9rem,2.5vw,1.5rem); pointer-events:none; }
+
+.planet-label {
+  position:absolute;
+  bottom:calc(100% + 5px);
+  left:50%; transform:translateX(-50%);
+  font-size:clamp(0.5rem,1.1vw,0.7rem);
+  font-weight:700; color:#fff;
+  white-space:nowrap;
+  background:rgba(0,0,0,0.6);
+  padding:2px 7px; border-radius:10px;
+  text-shadow:0 1px 3px #000;
+  pointer-events:none;
+}
+
+/* لوحة المعلومات */
+.overlay {
+  position:fixed; inset:0; z-index:100;
+  background:rgba(2,8,24,0.88);
+  backdrop-filter:blur(10px);
+  display:none; align-items:center; justify-content:center;
+  padding:16px;
+}
+.overlay.show { display:flex; }
+
+.card {
+  background:linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:22px;
+  padding:20px;
+  max-width:min(95vw,480px); width:100%;
+  max-height:85vh; overflow-y:auto;
+  position:relative;
+}
+.card-header {
+  display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  padding-bottom:10px; margin-bottom:14px;
+}
+.card-icon { font-size:2rem; }
+.card-title { font-size:clamp(1rem,3vw,1.35rem); font-weight:900; color:#ffd740; }
+.close-btn {
+  position:absolute; top:12px; left:12px;
+  width:30px; height:30px; border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.2);
+  color:#fff; font-size:0.9rem;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.close-btn:hover { background:rgba(255,80,80,0.35); }
+
+.section {
+  border-radius:12px; padding:10px 12px; margin-bottom:8px;
+  background:rgba(255,255,255,0.05);
+}
+.section-title {
+  font-size:clamp(0.7rem,1.8vw,0.85rem);
+  font-weight:700; margin-bottom:6px;
+}
+.row {
+  font-size:clamp(0.63rem,1.5vw,0.78rem);
+  color:rgba(255,255,255,0.88);
+  line-height:1.7; display:flex; gap:6px; margin:2px 0;
+}
+.bullet { flex-shrink:0; margin-top:2px; }
+</style>
+</head>
+<body>
+
+<!-- النجوم -->
+<div class="stars" id="stars"></div>
+
+<div class="title">🗺️ مبادئ الخرائط</div>
+<div class="subtitle">اضغط على أي كوكب لاستعراض المحتوى</div>
+
+<div class="system" id="system">
+  <div class="sun" onclick="open_panel('sun')">
+    <div class="sun-text">مبادئ<br>الخرائط</div>
+  </div>
+</div>
+
+<!-- لوحة المعلومات -->
+<div class="overlay" id="overlay" onclick="overlay_click(event)">
+  <div class="card" id="card">
+    <button class="close-btn" onclick="close_panel()">✕</button>
+    <div class="card-header">
+      <div class="card-icon" id="cIcon"></div>
+      <div class="card-title" id="cTitle"></div>
+    </div>
+    <div id="cBody"></div>
+  </div>
+</div>
+
+<script>
+// ── النجوم ──
+const starsEl = document.getElementById('stars');
+for(let i=0;i<180;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  const sz=Math.random()*1.8+0.3;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*5}s;`;
+  starsEl.appendChild(s);
+}
+
+// ── بيانات الكواكب ──
+const DATA = {
+  sun:{
+    icon:'☀️', title:'مبادئ الخرائط — الفصل الثاني',
+    sections:[
+      {color:'#ffd740',title:'🌌 مرحباً في النظام الكوني!',rows:[
+        'كل كوكب يمثّل موضوعاً من مواضيع مبادئ الخرائط',
+        'اضغط على أي كوكب لاستعراض محتواه التفصيلي',
+      ]},
+      {color:'#4fc3f7',title:'🪐 الكواكب الستة',rows:[
+        '🌍 مفهوم الخريطة وتاريخها',
+        '📐 عناصر الخريطة السبعة',
+        '🗂️ أنواع الخرائط الأربعة',
+        '📏 مقياس الرسم الثلاثة',
+        '⭐ أهمية الخريطة',
+        '🗝️ الرموز والمفتاح',
+      ]}
+    ]
+  },
+  concept:{
+    icon:'🌍', title:'مفهوم الخريطة',
+    sections:[
+      {color:'#42a5f5',title:'📖 التعريف',rows:[
+        'رسم توضيحي مصغّر لمظاهر سطح الأرض أو لجزء منه',
+        'تُمثَّل في لوحة مستوية بمقياس رسم معين',
+      ]},
+      {color:'#ffb300',title:'🏺 التاريخ',rows:[
+        '🏺 لوحة جاسور البابلية — 2500 ق.م',
+        '⛏️ مناجم الذهب للمصريين القدماء — 1320 ق.م',
+        '🇨🇳 خريطة بيه ييسو الصينية — 273 ق.م',
+        '  ↳ رُسمت على ألواح خشبية',
+        '  ↳ تُظهر الطرق والأنهار والحدود الإدارية',
+        '  ↳ تحتوي على شبكة الاحداثيات',
+        '📖 ابن حوقل: خريطة العالم — 977م',
+      ]},
+      {color:'#66bb6a',title:'💻 التطور الحديث',rows:[
+        'تطورت بالحاسوب وتقنية ArcGIS',
+        'أصبحت رقمية عالية الدقة والوضوح',
+      ]}
+    ]
+  },
+  elements:{
+    icon:'📐', title:'عناصر الخريطة',
+    sections:[
+      {color:'#ce93d8',title:'🗂️ العناصر الأساسية',rows:[
+        '🏷️ العنوان — مختصر معبّر يُكتب أعلى الخريطة',
+        '📏 مقياس الرسم — النسبة بين الخريطة والأرض',
+        '🔲 الإطار الخارجي — المحيط المستطيل للخريطة',
+        '🗝️ الرموز والمفتاح — شرح العلامات الاصطلاحية',
+        '🧭 توجيه الخريطة — السهم نحو الشمال',
+        '🌐 المسقط — إسقاط خطوط الطول والعرض',
+        '📋 المصدر — الجهة المُنفِّذة وسنة الإصدار',
+      ]}
+    ]
+  },
+  types:{
+    icon:'🗂️', title:'أنواع الخرائط',
+    sections:[
+      {color:'#ffd54f',title:'📏 أ) حسب مقياس الرسم',rows:[
+        'مقياس كبير (أصح): 1:500 — 1:250,000 — تفاصيل دقيقة',
+        'مقياس متوسط (أصح): 1:250,000 — 1:1,000,000',
+        'مقياس صغير: أكبر من 1:1,000,000 — كخرائط العالم',
+      ]},
+      {color:'#66bb6a',title:'🗺️ ب) حسب الموضوع',rows:[
+        '• عامة: تضاريس، طبوغرافية، مواقع عامة',
+        '• توزيعات بشرية: سكان، كثافة، عمران، إدارية، سياسية، تاريخية',
+        '• توزيعات طبيعية: مناخ، تربة، نباتات، جيولوجية، جيومورفولوجية',
+        '• توزيعات اقتصادية: زراعة، معادن، صناعة، موارد طبيعية',
+      ]},
+      {color:'#ef5350',title:'🌐 ج) حسب الامتداد الجغرافي',rows:[
+        'خرائط العالم — خرائط القارات',
+        'خرائط الدول — خرائط المحافظات — خرائط المخططات',
+      ]},
+      {color:'#ab47bc',title:'🔵 د) حسب النوع',rows:[
+        'خرائط مستوية: ورقية أو رقمية',
+        'خرائط كروية: الكرة الأرضية — نموذج كروي للكوكب',
+      ]}
+    ]
+  },
+  scale:{
+    icon:'📏', title:'مقياس الرسم',
+    sections:[
+      {color:'#4db6ac',title:'📖 التعريف',rows:[
+        'النسبة بين الأطوال على الخريطة وما يقابلها على سطح الأرض',
+      ]},
+      {color:'#c084fc',title:'✍️ المقياس الكتابي',rows:[
+        'يُكتب بشكل نص: 1 سم = 2 كم',
+      ]},
+      {color:'#60a5fa',title:'🔢 المقياس العددي (الكسر)',rows:[
+        'يُكتب كسراً: 1:200,000 أو 1/200,000',
+        'كلما صغر المقام كان المقياس أكبر (أصح)',
+      ]},
+      {color:'#fbbf24',title:'📊 المقياس الخطي (المصوّر)',rows:[
+        'خط مستقيم مقسّم إلى أجزاء متساوية',
+        'يُكتب على كل جزء ما يقابله بالكيلومترات على الأرض',
+      ]}
+    ]
+  },
+  importance:{
+    icon:'⭐', title:'أهمية الخريطة',
+    sections:[
+      {color:'#ffca28',title:'🎯 الاستخدامات',rows:[
+        '📚 التعليم والبحث العلمي — ملاحظة الظواهر وتحليلها',
+        '🌍 دراسة الظواهر الجغرافية المختلفة',
+        '🏗️ التخطيط للمشروعات التنموية وقياس المساحات',
+        '🌾 مساعدة المزارعين في تصنيف التربة',
+        '⛏️ الجيولوجيون: دراسة برامج التعدين واستغلال الثروات',
+        '✈️ السياحة: إرشاد السوّاح للمعالم والطرق',
+        '⚔️ العمليات العسكرية وتحديد الأماكن المناسبة للدفاع',
+        '🏛️ إظهار هيبة الدولة والاعتراف بحدودها دولياً',
+      ]}
+    ]
+  },
+  symbols:{
+    icon:'🗝️', title:'الرموز والمفتاح',
+    sections:[
+      {color:'#29b6f6',title:'📖 التعريف',rows:[
+        'العلامات الاصطلاحية التي تُمثّل الظواهر على الخريطة',
+        'المفتاح: يشرح هذه الرموز ودلالاتها',
+      ]},
+      {color:'#80deea',title:'🗺️ أمثلة على الرموز',rows:[
+        '✈️ مطار   |   〰️ نهر / وادي / قناة',
+        '⛽ بترول   |   🔵 بحيرة   |   🌿 مستنقع',
+        '▲ قمة جبل   |   🏠 مدينة   |   🌴 واحة',
+        '─ ─ حدود دولية   |   - - حدود إدارية',
+        '══ طريق معبّد   |   ┄┄ طريق غير معبّد',
+      ]}
+    ]
+  }
+};
+
+// ── بناء الكواكب ──
+const planets = [
+  {id:'concept',  emoji:'🌍', label:'مفهوم الخريطة', r:14, dur:22, start:20,  size:52, color:'#1565c0', glow:'#42a5f5'},
+  {id:'elements', emoji:'📐', label:'عناصر الخريطة',  r:22, dur:32, start:80,  size:44, color:'#6a1b9a', glow:'#ce93d8'},
+  {id:'types',    emoji:'🗂️', label:'أنواع الخرائط',  r:31, dur:45, start:160, size:58, color:'#bf360c', glow:'#ff7043'},
+  {id:'scale',    emoji:'📏', label:'مقياس الرسم',    r:40, dur:58, start:240, size:42, color:'#00695c', glow:'#4db6ac'},
+  {id:'importance',emoji:'⭐',label:'أهمية الخريطة', r:48, dur:72, start:300, size:48, color:'#e65100', glow:'#ffca28'},
+  {id:'symbols',  emoji:'🗝️', label:'الرموز والمفتاح',r:56, dur:88, start:120, size:38, color:'#004d7a', glow:'#29b6f6'},
+];
+
+function build(){
+  const sys = document.getElementById('system');
+  sys.querySelectorAll('.orbit-ring,.planet-container').forEach(e=>e.remove());
+  const sz = sys.offsetWidth;
+
+  planets.forEach(p=>{
+    const orbitPx = sz * p.r/100;
+    const pxSize  = Math.max(32, Math.min(p.size, sz*0.12));
+
+    // حلقة المدار
+    const ring = document.createElement('div');
+    ring.className='orbit-ring';
+    ring.style.cssText=`width:${orbitPx*2}px;height:${orbitPx*2}px;margin-left:${-orbitPx}px;margin-top:${-orbitPx}px;`;
+    sys.appendChild(ring);
+
+    // حاوية الكوكب تدور
+    const cont = document.createElement('div');
+    cont.className='planet-container';
+    cont.style.cssText=`animation-duration:${p.dur}s;animation-delay:${-(p.start/360)*p.dur}s;`;
+    sys.appendChild(cont);
+
+    // الكوكب
+    const pl = document.createElement('div');
+    pl.className='planet';
+    pl.style.cssText=`
+      width:${pxSize}px;height:${pxSize}px;
+      top:${-orbitPx}px;left:0px;
+      background:radial-gradient(circle at 35% 30%, ${p.color}cc, ${p.color}, #000a);
+      box-shadow:0 0 ${pxSize*.5}px ${p.glow}99,0 0 ${pxSize}px ${p.glow}33;
+      animation-duration:${p.dur}s;animation-delay:${-(p.start/360)*p.dur}s;
+    `;
+    pl.innerHTML=`<div class="planet-emoji">${p.emoji}</div><div class="planet-label">${p.label}</div>`;
+    pl.addEventListener('click', ()=>open_panel(p.id));
+    cont.appendChild(pl);
+  });
+}
+
+build();
+window.addEventListener('resize', build);
+
+// ── لوحة المعلومات ──
+function open_panel(id){
+  const d = DATA[id]; if(!d) return;
+  document.getElementById('cIcon').textContent=d.icon;
+  document.getElementById('cTitle').textContent=d.title;
+  const body=document.getElementById('cBody');
+  body.innerHTML='';
+  d.sections.forEach(sec=>{
+    const div=document.createElement('div');
+    div.className='section';
+    div.innerHTML=`<div class="section-title" style="color:${sec.color}">${sec.title}</div>`
+      + sec.rows.map(r=>`<div class="row"><span class="bullet" style="color:${sec.color}">◈</span><span>${r}</span></div>`).join('');
+    body.appendChild(div);
+  });
+  document.getElementById('overlay').classList.add('show');
+}
+function close_panel(){ document.getElementById('overlay').classList.remove('show'); }
+function overlay_click(e){ if(e.target===document.getElementById('overlay')) close_panel(); }
+</script>
+</body>
+</html>
